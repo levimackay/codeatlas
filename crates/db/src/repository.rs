@@ -85,7 +85,14 @@ impl Database {
             let status: String = row.get(3)?;
             let resources_found: i64 = row.get(4)?;
             let providers_json: String = row.get(5)?;
-            Ok((id, started_at, finished_at, status, resources_found, providers_json))
+            Ok((
+                id,
+                started_at,
+                finished_at,
+                status,
+                resources_found,
+                providers_json,
+            ))
         })?;
 
         let mut out = Vec::new();
@@ -95,8 +102,7 @@ impl Database {
                 id: parse_uuid(&id)?,
                 started_at: parse_timestamp(&started_at)?,
                 finished_at: finished_at.map(|s| parse_timestamp(&s)).transpose()?,
-                status: scan_status_from_str(&status)
-                    .map_err(crate::DbError::Integrity)?,
+                status: scan_status_from_str(&status).map_err(crate::DbError::Integrity)?,
                 resources_found: resources_found as usize,
                 providers_run: serde_json::from_str::<Vec<ProviderRunSummary>>(&providers_json)?,
             });
@@ -122,11 +128,21 @@ impl Database {
             let evidence_json: String = row.get(5)?;
             let first_seen: String = row.get(6)?;
             let last_seen: String = row.get(7)?;
-            Ok((id, kind, name, path, attributes_json, evidence_json, first_seen, last_seen))
+            Ok((
+                id,
+                kind,
+                name,
+                path,
+                attributes_json,
+                evidence_json,
+                first_seen,
+                last_seen,
+            ))
         })?;
 
         for row in resource_rows {
-            let (id, kind, name, path, attributes_json, evidence_json, first_seen, last_seen) = row?;
+            let (id, kind, name, path, attributes_json, evidence_json, first_seen, last_seen) =
+                row?;
             let attributes: BTreeMap<String, serde_json::Value> =
                 serde_json::from_str(&attributes_json)?;
             graph.upsert_resource(Resource {
@@ -218,7 +234,11 @@ impl Database {
         Ok(out)
     }
 
-    pub fn save_cleanup_candidates(&self, scan_id: Uuid, candidates: &[CleanupCandidate]) -> DbResult<()> {
+    pub fn save_cleanup_candidates(
+        &self,
+        scan_id: Uuid,
+        candidates: &[CleanupCandidate],
+    ) -> DbResult<()> {
         let mut conn = self.conn.lock().expect("db mutex poisoned");
         let tx = conn.transaction()?;
         tx.execute("DELETE FROM cleanup_candidates", [])?;
@@ -237,7 +257,12 @@ impl Database {
                     c.reasoning,
                     evidence_to_json(&c.evidence),
                     c.last_used.map(|t| t.to_rfc3339()),
-                    serde_json::to_string(&c.depended_on_by.iter().map(|id| id.to_string()).collect::<Vec<_>>())?,
+                    serde_json::to_string(
+                        &c.depended_on_by
+                            .iter()
+                            .map(|id| id.to_string())
+                            .collect::<Vec<_>>()
+                    )?,
                     c.size_bytes.map(|v| v as i64),
                     c.reversible as i64,
                     c.consequence,
@@ -276,8 +301,18 @@ impl Database {
         let mut out = Vec::new();
         for row in rows {
             let (
-                resource_id, resource_kind, name, path, category, reasoning, evidence_json,
-                last_used, depended_on_by_json, size_bytes, reversible, consequence,
+                resource_id,
+                resource_kind,
+                name,
+                path,
+                category,
+                reasoning,
+                evidence_json,
+                last_used,
+                depended_on_by_json,
+                size_bytes,
+                reversible,
+                consequence,
             ) = row?;
             let depended_on_by: Vec<String> = serde_json::from_str(&depended_on_by_json)?;
             let mut ids = Vec::with_capacity(depended_on_by.len());
@@ -289,7 +324,8 @@ impl Database {
                 resource_kind: kind_from_str(&resource_kind).map_err(crate::DbError::Integrity)?,
                 name,
                 path,
-                category: cleanup_category_from_str(&category).map_err(crate::DbError::Integrity)?,
+                category: cleanup_category_from_str(&category)
+                    .map_err(crate::DbError::Integrity)?,
                 reasoning,
                 evidence: evidence_from_json(&evidence_json),
                 last_used: last_used.map(|s| parse_timestamp(&s)).transpose()?,
@@ -331,8 +367,10 @@ impl Database {
 
         let mut out = Vec::new();
         for row in rows {
-            let (id, kind, name, path, attributes_json, evidence_json, first_seen, last_seen) = row?;
-            let attributes: BTreeMap<String, serde_json::Value> = serde_json::from_str(&attributes_json)?;
+            let (id, kind, name, path, attributes_json, evidence_json, first_seen, last_seen) =
+                row?;
+            let attributes: BTreeMap<String, serde_json::Value> =
+                serde_json::from_str(&attributes_json)?;
             out.push(Resource {
                 id: parse_uuid(&id)?,
                 kind: kind_from_str(&kind).map_err(crate::DbError::Integrity)?,
@@ -350,9 +388,16 @@ impl Database {
     pub fn get_setting<T: serde::de::DeserializeOwned>(&self, key: &str) -> DbResult<Option<T>> {
         let conn = self.conn.lock().expect("db mutex poisoned");
         let value_json: Option<String> = conn
-            .query_row("SELECT value_json FROM app_settings WHERE key = ?1", params![key], |row| row.get(0))
+            .query_row(
+                "SELECT value_json FROM app_settings WHERE key = ?1",
+                params![key],
+                |row| row.get(0),
+            )
             .optional()?;
-        value_json.map(|json| serde_json::from_str(&json)).transpose().map_err(DbError::from)
+        value_json
+            .map(|json| serde_json::from_str(&json))
+            .transpose()
+            .map_err(DbError::from)
     }
 
     pub fn set_setting<T: serde::Serialize>(&self, key: &str, value: &T) -> DbResult<()> {
@@ -385,19 +430,22 @@ impl Database {
             },
         )
         .optional()?
-        .map(|(id, kind, name, path, attributes_json, evidence_json, first_seen, last_seen)| {
-            let attributes: BTreeMap<String, serde_json::Value> = serde_json::from_str(&attributes_json)?;
-            Ok(Resource {
-                id: parse_uuid(&id)?,
-                kind: kind_from_str(&kind).map_err(crate::DbError::Integrity)?,
-                name,
-                path,
-                attributes,
-                evidence: evidence_from_json(&evidence_json),
-                first_seen: parse_timestamp(&first_seen)?,
-                last_seen: parse_timestamp(&last_seen)?,
-            })
-        })
+        .map(
+            |(id, kind, name, path, attributes_json, evidence_json, first_seen, last_seen)| {
+                let attributes: BTreeMap<String, serde_json::Value> =
+                    serde_json::from_str(&attributes_json)?;
+                Ok(Resource {
+                    id: parse_uuid(&id)?,
+                    kind: kind_from_str(&kind).map_err(crate::DbError::Integrity)?,
+                    name,
+                    path,
+                    attributes,
+                    evidence: evidence_from_json(&evidence_json),
+                    first_seen: parse_timestamp(&first_seen)?,
+                    last_seen: parse_timestamp(&last_seen)?,
+                })
+            },
+        )
         .transpose()
     }
 }
@@ -435,8 +483,12 @@ mod tests {
     fn search_matches_name_and_path() {
         let db = Database::open_in_memory().unwrap();
         let mut graph = Graph::new();
-        graph.upsert_resource(Resource::new(ResourceKind::Tool, "postgres").with_path("/usr/local/bin/postgres"));
-        graph.upsert_resource(Resource::new(ResourceKind::Tool, "node").with_path("/usr/local/bin/node"));
+        graph.upsert_resource(
+            Resource::new(ResourceKind::Tool, "postgres").with_path("/usr/local/bin/postgres"),
+        );
+        graph.upsert_resource(
+            Resource::new(ResourceKind::Tool, "node").with_path("/usr/local/bin/node"),
+        );
 
         let mut scan = ScanRecord::start();
         scan.status = ScanStatus::Completed;

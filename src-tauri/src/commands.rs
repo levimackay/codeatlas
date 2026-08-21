@@ -28,16 +28,23 @@ pub struct ScanSummary {
 }
 
 #[tauri::command]
-pub async fn run_scan(state: State<'_, AppState>, roots: Option<Vec<String>>) -> CmdResult<ScanSummary> {
+pub async fn run_scan(
+    state: State<'_, AppState>,
+    roots: Option<Vec<String>>,
+) -> CmdResult<ScanSummary> {
     let db = state.db.clone();
     let home = home_dir();
 
     let search_roots = match roots {
-        Some(roots) if !roots.is_empty() => roots.into_iter().map(std::path::PathBuf::from).collect(),
+        Some(roots) if !roots.is_empty() => {
+            roots.into_iter().map(std::path::PathBuf::from).collect()
+        }
         _ => {
             let stored: Option<Vec<String>> = db.get_setting("search_roots").map_err(stringify)?;
             match stored {
-                Some(roots) if !roots.is_empty() => roots.into_iter().map(std::path::PathBuf::from).collect(),
+                Some(roots) if !roots.is_empty() => {
+                    roots.into_iter().map(std::path::PathBuf::from).collect()
+                }
                 _ => providers::default_search_roots(&home),
             }
         }
@@ -48,13 +55,18 @@ pub async fn run_scan(state: State<'_, AppState>, roots: Option<Vec<String>>) ->
     let engine = DiscoveryEngine::with_builtin_providers();
     let outcome = engine.run_scan(&ctx, &previous).await;
 
-    db.persist_scan(&outcome.record, &outcome.graph).map_err(stringify)?;
+    db.persist_scan(&outcome.record, &outcome.graph)
+        .map_err(stringify)?;
     db.record_changes(&outcome.changes).map_err(stringify)?;
 
     let candidates = codeatlas_discovery::cleanup::analyze(&outcome.graph);
-    db.save_cleanup_candidates(outcome.record.id, &candidates).map_err(stringify)?;
+    db.save_cleanup_candidates(outcome.record.id, &candidates)
+        .map_err(stringify)?;
 
-    Ok(ScanSummary { record: outcome.record, changes: outcome.changes })
+    Ok(ScanSummary {
+        record: outcome.record,
+        changes: outcome.changes,
+    })
 }
 
 #[tauri::command]
@@ -63,13 +75,26 @@ pub fn get_graph(state: State<'_, AppState>) -> CmdResult<Graph> {
 }
 
 #[tauri::command]
-pub fn search_resources(state: State<'_, AppState>, query: String, limit: Option<usize>) -> CmdResult<Vec<Resource>> {
-    state.db.search(&query, limit.unwrap_or(50)).map_err(stringify)
+pub fn search_resources(
+    state: State<'_, AppState>,
+    query: String,
+    limit: Option<usize>,
+) -> CmdResult<Vec<Resource>> {
+    state
+        .db
+        .search(&query, limit.unwrap_or(50))
+        .map_err(stringify)
 }
 
 #[tauri::command]
-pub fn list_changes(state: State<'_, AppState>, limit: Option<usize>) -> CmdResult<Vec<ChangeEvent>> {
-    state.db.list_changes(limit.unwrap_or(100)).map_err(stringify)
+pub fn list_changes(
+    state: State<'_, AppState>,
+    limit: Option<usize>,
+) -> CmdResult<Vec<ChangeEvent>> {
+    state
+        .db
+        .list_changes(limit.unwrap_or(100))
+        .map_err(stringify)
 }
 
 #[tauri::command]
@@ -95,17 +120,27 @@ pub fn get_search_roots(state: State<'_, AppState>) -> CmdResult<Vec<String>> {
 
 #[tauri::command]
 pub fn set_search_roots(state: State<'_, AppState>, roots: Vec<String>) -> CmdResult<()> {
-    state.db.set_setting("search_roots", &roots).map_err(stringify)
+    state
+        .db
+        .set_setting("search_roots", &roots)
+        .map_err(stringify)
 }
 
 #[tauri::command]
 pub fn get_onboarding_complete(state: State<'_, AppState>) -> CmdResult<bool> {
-    Ok(state.db.get_setting::<bool>("onboarding_complete").map_err(stringify)?.unwrap_or(false))
+    Ok(state
+        .db
+        .get_setting::<bool>("onboarding_complete")
+        .map_err(stringify)?
+        .unwrap_or(false))
 }
 
 #[tauri::command]
 pub fn set_onboarding_complete(state: State<'_, AppState>) -> CmdResult<()> {
-    state.db.set_setting("onboarding_complete", &true).map_err(stringify)
+    state
+        .db
+        .set_setting("onboarding_complete", &true)
+        .map_err(stringify)
 }
 
 fn home_dir() -> std::path::PathBuf {

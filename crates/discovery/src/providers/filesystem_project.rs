@@ -43,7 +43,9 @@ impl DiscoveryProvider for FilesystemProjectProvider {
 
     fn availability(&self, ctx: &ScanContext) -> Availability {
         if ctx.search_roots.is_empty() {
-            Availability::Unavailable { reason: "no search roots configured".to_string() }
+            Availability::Unavailable {
+                reason: "no search roots configured".to_string(),
+            }
         } else {
             Availability::Available
         }
@@ -85,7 +87,11 @@ fn walk_for_projects(root: &Path, ctx: &ScanContext, output: &mut ProviderOutput
         }
 
         let name = entry.file_name().to_string_lossy();
-        if ctx.ignored_directory_names.iter().any(|ignored| ignored == name.as_ref()) {
+        if ctx
+            .ignored_directory_names
+            .iter()
+            .any(|ignored| ignored == name.as_ref())
+        {
             walker.skip_current_dir();
             continue;
         }
@@ -166,7 +172,11 @@ mod tests {
         let node_project = root.path().join("web-app");
         std::fs::create_dir_all(node_project.join("node_modules/some-dep")).unwrap();
         std::fs::write(node_project.join("package.json"), "{}").unwrap();
-        std::fs::write(node_project.join("node_modules/some-dep/package.json"), "{}").unwrap();
+        std::fs::write(
+            node_project.join("node_modules/some-dep/package.json"),
+            "{}",
+        )
+        .unwrap();
 
         let rust_project = root.path().join("cli-tool");
         std::fs::create_dir_all(&rust_project).unwrap();
@@ -178,7 +188,10 @@ mod tests {
         let names: Vec<_> = output.resources.iter().map(|r| r.name.as_str()).collect();
         assert!(names.contains(&"web-app"));
         assert!(names.contains(&"cli-tool"));
-        assert!(!names.contains(&"some-dep"), "should not descend into node_modules: {names:?}");
+        assert!(
+            !names.contains(&"some-dep"),
+            "should not descend into node_modules: {names:?}"
+        );
         assert_eq!(output.resources.len(), 2);
     }
 }

@@ -45,7 +45,11 @@ impl DiscoveryProvider for ProcessPortProvider {
 
         for proc in &processes {
             let truncated_command = proc.command_line.as_ref().map(|cmd| {
-                cmd.iter().take(MAX_COMMAND_LINE_TOKENS).cloned().collect::<Vec<_>>().join(" ")
+                cmd.iter()
+                    .take(MAX_COMMAND_LINE_TOKENS)
+                    .cloned()
+                    .collect::<Vec<_>>()
+                    .join(" ")
             });
 
             let mut resource = Resource::new(ResourceKind::Process, proc.name.clone())

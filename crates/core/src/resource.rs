@@ -42,7 +42,10 @@ impl ResourceKind {
     /// even though the resource itself (its existence and name) is safe
     /// to display.
     pub fn is_sensitive_by_default(self) -> bool {
-        matches!(self, ResourceKind::EnvironmentVariable | ResourceKind::SshConfigEntry)
+        matches!(
+            self,
+            ResourceKind::EnvironmentVariable | ResourceKind::SshConfigEntry
+        )
     }
 
     pub fn label(self) -> &'static str {
@@ -121,7 +124,10 @@ const RESOURCE_ID_NAMESPACE: Uuid = Uuid::from_bytes([
 /// always have. Two calls with the same inputs always produce the same
 /// id, from any process, on any run.
 pub fn deterministic_id(kind: ResourceKind, discriminator: &str) -> ResourceId {
-    Uuid::new_v5(&RESOURCE_ID_NAMESPACE, format!("{kind:?}:{discriminator}").as_bytes())
+    Uuid::new_v5(
+        &RESOURCE_ID_NAMESPACE,
+        format!("{kind:?}:{discriminator}").as_bytes(),
+    )
 }
 
 impl Resource {

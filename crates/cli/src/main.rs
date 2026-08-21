@@ -4,7 +4,11 @@ use codeatlas_discovery::{DiscoveryEngine, ScanContext};
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "codeatlas", version, about = "Understand your development environment")]
+#[command(
+    name = "codeatlas",
+    version,
+    about = "Understand your development environment"
+)]
 struct Cli {
     /// Override the database location. Defaults to the OS application
     /// data directory, the same one the desktop app uses.
@@ -25,13 +29,9 @@ enum Command {
         root: Vec<PathBuf>,
     },
     /// List discovered resources, optionally filtered by kind.
-    Ls {
-        kind: Option<String>,
-    },
+    Ls { kind: Option<String> },
     /// Search the current machine model.
-    Search {
-        query: String,
-    },
+    Search { query: String },
     /// Show recent changes.
     Changes {
         #[arg(long, default_value_t = 20)]
@@ -128,7 +128,13 @@ fn list_resources(db: &Database, kind: Option<String>) -> anyhow::Result<()> {
     let graph = db.latest_graph()?;
     for resource in graph.resources() {
         if let Some(kind) = &kind {
-            if !resource.kind.label().to_lowercase().replace(' ', "_").contains(&kind.to_lowercase()) {
+            if !resource
+                .kind
+                .label()
+                .to_lowercase()
+                .replace(' ', "_")
+                .contains(&kind.to_lowercase())
+            {
                 continue;
             }
         }
@@ -149,7 +155,12 @@ fn search(db: &Database, query: &str) -> anyhow::Result<()> {
         return Ok(());
     }
     for resource in results {
-        println!("{:<20} {:<30} {}", resource.kind.label(), resource.name, resource.path.unwrap_or_default());
+        println!(
+            "{:<20} {:<30} {}",
+            resource.kind.label(),
+            resource.name,
+            resource.path.unwrap_or_default()
+        );
     }
     Ok(())
 }
@@ -157,7 +168,12 @@ fn search(db: &Database, query: &str) -> anyhow::Result<()> {
 fn print_changes(db: &Database, limit: usize) -> anyhow::Result<()> {
     let changes = db.list_changes(limit)?;
     for change in changes {
-        println!("{}  {:?}  {}", change.occurred_at.to_rfc3339(), change.kind, change.summary);
+        println!(
+            "{}  {:?}  {}",
+            change.occurred_at.to_rfc3339(),
+            change.kind,
+            change.summary
+        );
     }
     Ok(())
 }

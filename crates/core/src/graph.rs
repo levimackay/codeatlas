@@ -54,7 +54,12 @@ pub struct Relationship {
 
 impl Relationship {
     pub fn new(from: ResourceId, to: ResourceId, kind: RelationshipKind) -> Self {
-        Self { from, to, kind, evidence: Vec::new() }
+        Self {
+            from,
+            to,
+            kind,
+            evidence: Vec::new(),
+        }
     }
 
     pub fn with_evidence(mut self, evidence: Evidence) -> Self {
@@ -88,7 +93,10 @@ impl Graph {
 
     pub fn add_relationship(&mut self, relationship: Relationship) {
         let idx = self.relationships.len();
-        self.outgoing.entry(relationship.from).or_default().push(idx);
+        self.outgoing
+            .entry(relationship.from)
+            .or_default()
+            .push(idx);
         self.incoming.entry(relationship.to).or_default().push(idx);
         self.relationships.push(relationship);
     }
@@ -145,7 +153,11 @@ impl Graph {
                 continue;
             }
             for rel in self.outgoing(current).chain(self.incoming(current)) {
-                let next = if rel.from == current { rel.to } else { rel.from };
+                let next = if rel.from == current {
+                    rel.to
+                } else {
+                    rel.from
+                };
                 if visited.insert(next) {
                     frontier.push_back((next, depth + 1));
                 }

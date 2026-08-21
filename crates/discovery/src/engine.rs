@@ -1,6 +1,8 @@
 use crate::context::ScanContext;
 use crate::provider::{Availability, DiscoveryProvider, ProviderOutput};
-use codeatlas_core::{diff_resources, ChangeEvent, Graph, ProviderRunSummary, ScanRecord, ScanStatus};
+use codeatlas_core::{
+    diff_resources, ChangeEvent, Graph, ProviderRunSummary, ScanRecord, ScanStatus,
+};
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -115,7 +117,11 @@ impl DiscoveryEngine {
 
         let changes = diff_resources(previous_graph.resources(), graph.resources());
 
-        ScanOutcome { record, graph, changes }
+        ScanOutcome {
+            record,
+            graph,
+            changes,
+        }
     }
 }
 

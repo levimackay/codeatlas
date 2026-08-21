@@ -30,7 +30,9 @@ impl DiscoveryProvider for GitProvider {
     fn availability(&self, _ctx: &ScanContext) -> Availability {
         match which::which("git") {
             Ok(_) => Availability::Available,
-            Err(_) => Availability::Unavailable { reason: "git is not on PATH".to_string() },
+            Err(_) => Availability::Unavailable {
+                reason: "git is not on PATH".to_string(),
+            },
         }
     }
 
@@ -70,7 +72,11 @@ fn find_repositories(root: &Path, ctx: &ScanContext, output: &mut ProviderOutput
         }
 
         let name = entry.file_name().to_string_lossy();
-        if ctx.ignored_directory_names.iter().any(|ignored| ignored == name.as_ref()) {
+        if ctx
+            .ignored_directory_names
+            .iter()
+            .any(|ignored| ignored == name.as_ref())
+        {
             walker.skip_current_dir();
             continue;
         }
@@ -123,7 +129,9 @@ fn inspect_repository(dir: &Path) -> Option<RepositoryFindings> {
             "recent_commits",
             recent_commits
                 .iter()
-                .map(|c| serde_json::json!({ "subject": c.subject, "committed_at": c.committed_at }))
+                .map(
+                    |c| serde_json::json!({ "subject": c.subject, "committed_at": c.committed_at }),
+                )
                 .collect::<Vec<_>>(),
         )
         .with_evidence(Evidence {
@@ -136,12 +144,14 @@ fn inspect_repository(dir: &Path) -> Option<RepositoryFindings> {
         repository = repository.with_attribute("current_branch", branch);
     }
 
-    let contains_relationship = Relationship::new(project_id, repository.id, RelationshipKind::Contains)
-        .with_evidence(Evidence {
-            source: "git".to_string(),
-            description: "repository root is the project root".to_string(),
-            path: None,
-        });
+    let contains_relationship =
+        Relationship::new(project_id, repository.id, RelationshipKind::Contains).with_evidence(
+            Evidence {
+                source: "git".to_string(),
+                description: "repository root is the project root".to_string(),
+                path: None,
+            },
+        );
 
     let (remote_resource, remote_relationship) = run_git(dir, &["remote", "get-url", "origin"])
         .map(|url| redact_credentials(url.trim()))
@@ -164,7 +174,12 @@ fn inspect_repository(dir: &Path) -> Option<RepositoryFindings> {
         .map(|(r, rel)| (Some(r), Some(rel)))
         .unwrap_or((None, None));
 
-    Some(RepositoryFindings { repository, contains_relationship, remote_resource, remote_relationship })
+    Some(RepositoryFindings {
+        repository,
+        contains_relationship,
+        remote_resource,
+        remote_relationship,
+    })
 }
 
 struct CommitSummary {
@@ -179,7 +194,10 @@ fn parse_commits(raw: &str) -> Vec<CommitSummary> {
             let _hash = parts.next()?;
             let subject = parts.next()?.to_string();
             let committed_at = parts.next().unwrap_or_default().to_string();
-            Some(CommitSummary { subject, committed_at })
+            Some(CommitSummary {
+                subject,
+                committed_at,
+            })
         })
         .collect()
 }
@@ -201,7 +219,12 @@ fn redact_credentials(url: &str) -> String {
 }
 
 fn run_git(dir: &Path, args: &[&str]) -> Option<String> {
-    let output = Command::new("git").arg("-C").arg(dir).args(args).output().ok()?;
+    let output = Command::new("git")
+        .arg("-C")
+        .arg(dir)
+        .args(args)
+        .output()
+        .ok()?;
     if !output.status.success() {
         return None;
     }

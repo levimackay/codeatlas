@@ -100,7 +100,10 @@ pub fn diff_resources<'a>(
 /// Resources are matched across scans by kind + path (or kind + name when
 /// there is no path), not by id, since a fresh scan assigns fresh ids.
 fn identity_key(resource: &crate::resource::Resource) -> (ResourceKind, String) {
-    let discriminator = resource.path.clone().unwrap_or_else(|| resource.name.clone());
+    let discriminator = resource
+        .path
+        .clone()
+        .unwrap_or_else(|| resource.name.clone());
     (resource.kind, discriminator)
 }
 
@@ -126,8 +129,14 @@ mod tests {
 
         let events = diff_resources(&previous, &current);
         assert_eq!(events.len(), 3);
-        assert!(events.iter().any(|e| e.kind == ChangeKind::Discovered && e.resource_name == "bun"));
-        assert!(events.iter().any(|e| e.kind == ChangeKind::Removed && e.resource_name == "python2"));
-        assert!(events.iter().any(|e| e.kind == ChangeKind::Modified && e.resource_name == "node"));
+        assert!(events
+            .iter()
+            .any(|e| e.kind == ChangeKind::Discovered && e.resource_name == "bun"));
+        assert!(events
+            .iter()
+            .any(|e| e.kind == ChangeKind::Removed && e.resource_name == "python2"));
+        assert!(events
+            .iter()
+            .any(|e| e.kind == ChangeKind::Modified && e.resource_name == "node"));
     }
 }

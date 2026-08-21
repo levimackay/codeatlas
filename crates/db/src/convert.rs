@@ -60,12 +60,15 @@ pub(crate) fn kind_from_str(s: &str) -> Result<ResourceKind, String> {
 pub(crate) fn parse_timestamp(s: &str) -> rusqlite::Result<DateTime<Utc>> {
     DateTime::parse_from_rfc3339(s)
         .map(|dt| dt.with_timezone(&Utc))
-        .map_err(|e| rusqlite::Error::InvalidColumnType(0, e.to_string(), rusqlite::types::Type::Text))
+        .map_err(|e| {
+            rusqlite::Error::InvalidColumnType(0, e.to_string(), rusqlite::types::Type::Text)
+        })
 }
 
 pub(crate) fn parse_uuid(s: &str) -> rusqlite::Result<ResourceId> {
-    uuid::Uuid::from_str(s)
-        .map_err(|e| rusqlite::Error::InvalidColumnType(0, e.to_string(), rusqlite::types::Type::Text))
+    uuid::Uuid::from_str(s).map_err(|e| {
+        rusqlite::Error::InvalidColumnType(0, e.to_string(), rusqlite::types::Type::Text)
+    })
 }
 
 pub(crate) fn evidence_to_json(evidence: &[Evidence]) -> String {

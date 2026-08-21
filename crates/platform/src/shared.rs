@@ -83,8 +83,11 @@ pub(crate) fn list_processes_via_sysinfo() -> Vec<crate::process::ProcessInfo> {
             parent_pid: proc.parent().map(|p| p.as_u32()),
             name: proc.name().to_string_lossy().into_owned(),
             command_line: {
-                let cmd: Vec<String> =
-                    proc.cmd().iter().map(|s| s.to_string_lossy().into_owned()).collect();
+                let cmd: Vec<String> = proc
+                    .cmd()
+                    .iter()
+                    .map(|s| s.to_string_lossy().into_owned())
+                    .collect();
                 if cmd.is_empty() {
                     None
                 } else {

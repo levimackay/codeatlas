@@ -15,7 +15,10 @@ use codeatlas_core::{CleanupCandidate, CleanupCategory, Graph, Resource, Resourc
 /// Reads a resource's `size_bytes` attribute if the provider that found
 /// it reported one.
 fn size_bytes(resource: &Resource) -> Option<u64> {
-    resource.attributes.get("size_bytes").and_then(|v| v.as_u64())
+    resource
+        .attributes
+        .get("size_bytes")
+        .and_then(|v| v.as_u64())
 }
 
 fn last_used(resource: &Resource) -> Option<chrono::DateTime<chrono::Utc>> {
@@ -41,10 +44,15 @@ pub fn analyze(graph: &Graph) -> Vec<CleanupCandidate> {
     let mut candidates = Vec::new();
 
     for resource in graph.resources() {
-        let Some(category) = category_for(resource.kind) else { continue };
+        let Some(category) = category_for(resource.kind) else {
+            continue;
+        };
 
         let dependents: Vec<_> = graph.dependents_of(resource.id).into_iter().collect();
-        let reversible = matches!(resource.kind, ResourceKind::Cache | ResourceKind::BuildArtifact);
+        let reversible = matches!(
+            resource.kind,
+            ResourceKind::Cache | ResourceKind::BuildArtifact
+        );
 
         let reasoning = if dependents.is_empty() {
             format!(
@@ -61,13 +69,19 @@ pub fn analyze(graph: &Graph) -> Vec<CleanupCandidate> {
 
         let consequence = match resource.kind {
             ResourceKind::DockerImage => {
-                "removes the image; any stopped containers created from it are also removed".to_string()
+                "removes the image; any stopped containers created from it are also removed"
+                    .to_string()
             }
             ResourceKind::DockerVolume => {
                 "permanently deletes the volume's data; this cannot be undone".to_string()
             }
-            ResourceKind::Cache => "deletes the cache directory; it will be rebuilt automatically on next use".to_string(),
-            ResourceKind::BuildArtifact => "deletes the build output; rerunning the build regenerates it".to_string(),
+            ResourceKind::Cache => {
+                "deletes the cache directory; it will be rebuilt automatically on next use"
+                    .to_string()
+            }
+            ResourceKind::BuildArtifact => {
+                "deletes the build output; rerunning the build regenerates it".to_string()
+            }
             _ => "removes the resource".to_string(),
         };
 
@@ -87,7 +101,7 @@ pub fn analyze(graph: &Graph) -> Vec<CleanupCandidate> {
         });
     }
 
-    candidates.sort_by(|a, b| b.size_bytes.unwrap_or(0).cmp(&a.size_bytes.unwrap_or(0)));
+    candidates.sort_by_key(|c| std::cmp::Reverse(c.size_bytes.unwrap_or(0)));
     candidates
 }
 
@@ -127,7 +141,10 @@ mod tests {
         ));
 
         let candidates = analyze(&graph);
-        let image_candidate = candidates.iter().find(|c| c.resource_id == image_id).unwrap();
+        let image_candidate = candidates
+            .iter()
+            .find(|c| c.resource_id == image_id)
+            .unwrap();
         assert!(!image_candidate.is_uncontested());
         assert_eq!(image_candidate.depended_on_by, vec![container_id]);
     }
