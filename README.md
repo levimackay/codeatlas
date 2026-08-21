@@ -10,6 +10,8 @@
 [![CodeQL](https://github.com/levimackay/codeatlas/actions/workflows/codeql.yml/badge.svg)](https://github.com/levimackay/codeatlas/actions/workflows/codeql.yml)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#license)
 
+[codeatlas.levimackay.com](https://codeatlas.levimackay.com)
+
 </div>
 
 ---
@@ -62,8 +64,13 @@ understands the machine as a system, not a pile of unrelated processes.
 
 ## Screenshots
 
-*(Screenshots of the actual running application go here once the first
-tagged release is cut — see `docs/screenshots/`.)*
+Real captures of the running app, rendered against a scan of this
+repository itself (see `src/demo/` for how these are produced locally).
+
+| | |
+|---|---|
+| ![Overview](docs/screenshots/overview.png) | ![Dependency graph](docs/screenshots/dependency-graph.png) |
+| ![Cleanup center](docs/screenshots/cleanup-center.png) | ![Projects](docs/screenshots/projects.png) |
 
 ## Architecture
 

@@ -88,9 +88,32 @@ jobs:
       - name: Build
         run: pnpm build
 
-  # website/ is a separate marketing site tracked and deployed independently
-  # by someone else, and does not yet have its own package.json. Skipping it
-  # here deliberately — add a dedicated job once it has its own build tooling.
+  website-check:
+    name: website-check
+    runs-on: ubuntu-latest
+    # The marketing site is its own independent npm project (see
+    # website/package.json) deployed separately to Cloudflare Pages; this
+    # job only verifies it still type-checks and builds, not part of the
+    # app's own release pipeline.
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
 
   cargo-audit:
     name: cargo-audit
