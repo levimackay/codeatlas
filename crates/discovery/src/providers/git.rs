@@ -222,9 +222,7 @@ fn parse_commits(raw: &str) -> Vec<CommitSummary> {
 fn redact_credentials(url: &str) -> String {
     if let Some(scheme_end) = url.find("://") {
         let (scheme, rest) = url.split_at(scheme_end + 3);
-        let authority_end = rest
-            .find(['/', '?', '#'])
-            .unwrap_or(rest.len());
+        let authority_end = rest.find(['/', '?', '#']).unwrap_or(rest.len());
         let (authority, remainder) = rest.split_at(authority_end);
         if let Some(at_pos) = authority.rfind('@') {
             let host = &authority[at_pos + 1..];
