@@ -1,0 +1,27 @@
+[package]
+name = "codeatlas-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Scriptable command-line interface to the CodeAtlas discovery engine"
+
+[[bin]]
+name = "codeatlas"
+path = "src/main.rs"
+
+[dependencies]
+codeatlas-core.workspace = true
+codeatlas-db.workspace = true
+codeatlas-platform.workspace = true
+codeatlas-discovery.workspace = true
+tokio.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+clap = { version = "4", features = ["derive"] }
+directories = "5"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"

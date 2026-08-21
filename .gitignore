@@ -1,0 +1,36 @@
+# Rust
+/target
+Cargo.lock.bak
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# Website build output
+website/dist/
+website/node_modules/
+website/.astro/
+
+# Editors / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Local data, never committed
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
