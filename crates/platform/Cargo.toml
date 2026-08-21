@@ -13,7 +13,7 @@ serde.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 chrono.workspace = true
-sysinfo = "0.32"
+sysinfo = "0.39"
 netstat2 = "0.11"
 
 [dev-dependencies]
