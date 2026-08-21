@@ -21,5 +21,11 @@
     }
   },
   "include": ["src"],
+  // src/demo/fixture.json is a gitignored local export of a real machine
+  // scan (see src/demo/mockTauriCore.ts) — it never exists in a fresh
+  // checkout or in CI. The demo build has its own tsconfig.demo.json that
+  // includes this directory; the default `tsc -b` used by `pnpm build`
+  // and CI must not try to resolve that import.
+  "exclude": ["src/demo"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
