@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CodeAtlas: a visual map of your development machine</title>
+  <meta
+    name="description"
+    content="CodeAtlas scans a developer machine and builds a real dependency graph between projects, processes, ports, Docker resources, runtimes, and package managers. Local-first, open source, no upload."
+  />
+  <link rel="icon" type="image/png" href="/icons/icon.png" />
+  <meta property="og:title" content="CodeAtlas: a visual map of your development machine" />
+  <meta
+    property="og:description"
+    content="A local-first, open-source desktop app that maps your projects, processes, ports, Docker resources, and the real dependency graph between them."
+  />
+  <meta property="og:type" content="website" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============================================================
+       Persistent instrument rail: set piece: persistent-orientation-device.
+       Recreates the app's own status-strip / active-sidebar-item device
+       (root DESIGN.md 4.2) as the site's only navigation. Never a floating
+       marketing navbar.
+       ============================================================ -->
+  <nav class="rail" aria-label="Page sections">
+    <a class="rail__brand" href="#hero">
+      <img src="/icons/icon.png" alt="" width="22" height="22" />
+      <span class="rail__brand-name">CodeAtlas</span>
+    </a>
+    <span class="rail__mobile-current">
+      <span class="rail__mobile-current-name mono"></span>
+    </span>
+    <ul class="rail__nav">
+      <li class="rail__item"><a class="rail__link" href="#hero" data-short-name="Hero"><span class="rail__index mono">01</span><span>Hero</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#machine-map" data-short-name="Machine map"><span class="rail__index mono">02</span><span>Machine map</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#projects" data-short-name="Projects"><span class="rail__index mono">03</span><span>Projects</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#graph" data-short-name="Dependency graph"><span class="rail__index mono">04</span><span>Dependency graph</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#cleanup" data-short-name="Cleanup center"><span class="rail__index mono">05</span><span>Cleanup center</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#local" data-short-name="Local"><span class="rail__index mono">06</span><span>Local.</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#privacy" data-short-name="Privacy"><span class="rail__index mono">07</span><span>Privacy</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#platforms" data-short-name="Platforms"><span class="rail__index mono">08</span><span>Platforms</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#cli" data-short-name="CLI"><span class="rail__index mono">09</span><span>Developer workflow</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#screenshots" data-short-name="Screenshots"><span class="rail__index mono">10</span><span>Screenshots</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#open-source" data-short-name="Open source"><span class="rail__index mono">11</span><span>Open source</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#download" data-short-name="Download"><span class="rail__index mono">12</span><span>Download</span></a></li>
+      <li class="rail__item"><a class="rail__link" href="#footer" data-short-name="Index"><span class="rail__index mono">13</span><span>Index</span></a></li>
+    </ul>
+    <div class="rail__status">
+      <span class="rail__status-dot" aria-hidden="true"></span>
+      <span>Site build · static</span>
+    </div>
+    <div class="rail__progress" aria-hidden="true"><div class="rail__progress-fill"></div></div>
+  </nav>
+
+  <main id="main" class="page">
+
+    <!-- ============================================================
+         1. HERO: the rail docks for the first time, states the one
+         clause, a small live sample dependency graph settles in beside
+         it. Dark. Breath density.
+         ============================================================ -->
+    <section id="hero" class="hero container" data-density="breath" aria-label="Introduction">
+      <div class="hero__grid">
+        <div>
+          <p class="eyebrow">CodeAtlas: a visual map of your development machine</p>
+          <h1 class="hero__clause">A real model of what's <em>actually</em> running on this machine.</h1>
+          <p class="hero__sub">
+            CodeAtlas scans your projects, processes, ports, Docker resources, runtimes, and
+            package managers, and builds the dependency graph between them from real evidence:
+            a container really was instantiated from that image, a process really is listening
+            on that port. It runs entirely on your machine, with no account, no cloud sync, no
+            upload, and no telemetry by default.
+          </p>
+          <div class="hero__ctas">
+            <a class="btn btn-primary" href="https://github.com/levimackay/codeatlas">Clone from GitHub</a>
+            <a class="btn btn-secondary" href="#graph">See the dependency graph</a>
+          </div>
+        </div>
+        <div>
+          <div class="hero__graph">
+            <span class="sample-tag">Sample data, not a scan of your machine</span>
+            <canvas id="hero-graph-canvas" aria-hidden="true"></canvas>
+          </div>
+          <p class="prose" style="font-size:12px; margin-top: var(--sp-3); max-width: none;">
+            This is the same rendering code the desktop app uses (force layout, kind-family
+            colors, hover-to-highlight), running on eight fabricated resources instead of a real
+            scan. The full version is in section 04.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         2. MACHINE MAP: set piece: dense-reference-table. The real
+         21-value ResourceKind list from src/lib/types.ts, grouped into
+         the app's real 8-row family table. Full density.
+         ============================================================ -->
+    <section id="machine-map" class="container" data-density="panel" aria-labelledby="machine-map-h">
+      <div class="section-head">
+        <h2 id="machine-map-h">The machine map</h2>
+        <p class="prose">
+          Every screen in CodeAtlas is a view onto one typed model. A resource is one of
+          <strong data-source="resourcekind-count">21 kinds</strong>, grouped here into the
+          eight families the app's own dependency-graph legend uses. This is the actual type
+          list from the app's source, not a paraphrase of it.
+        </p>
+      </div>
+      <div class="ref-table-wrap">
+        <table class="ref-table" id="ref-table">
+          <caption>Source: <code>src/lib/types.ts</code>, <code>ResourceKind</code>. Colors: <code>src/lib/kind-colors.ts</code>, unmodified.</caption>
+          <thead>
+            <tr>
+              <th scope="col">Kind</th>
+              <th scope="col">What it is</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="family-row"><td colspan="2">ORIGIN</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#C4783E"></span>project</td><td>A discovered codebase: <code>package.json</code>, <code>Cargo.toml</code>, <code>go.mod</code>, or a similar manifest marks the root.</td></tr>
+
+            <tr class="family-row"><td colspan="2">VERSION CONTROL</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#C1583E"></span>git_repository</td><td><code>.git</code> metadata: branch, status, recent commits, redacted remote URL.</td></tr>
+
+            <tr class="family-row"><td colspan="2">RUNTIME &amp; PROCESS</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#5B9FD9"></span>process</td><td>A running process, read from the OS process table.</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#4C8DC4"></span>runtime</td><td>An installed language runtime, detected on <code>PATH</code> (Node, Python, Go, Rust, Ruby, Java, .NET).</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#3E77A8"></span>network_listener</td><td>A process's listening socket, cross-referenced against the port it's bound to.</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#7BB3E5"></span>port</td><td>A TCP/UDP port with something listening on it.</td></tr>
+
+            <tr class="family-row"><td colspan="2">CONTAINERS</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#8A6FD1"></span>docker_container</td><td>A container, running or stopped.</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#7159B8"></span>docker_image</td><td>An image, whether or not any container currently uses it.</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#A48EE0"></span>docker_volume</td><td>A named volume, whether or not any container currently mounts it.</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#5B4696"></span>docker_network</td><td>A user-defined Docker network.</td></tr>
+
+            <tr class="family-row"><td colspan="2">PACKAGE MANAGEMENT</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#3FAA9C"></span>package_manager</td><td>An installed package manager (npm, pnpm, yarn, bun, pip, cargo, Homebrew, apt/dpkg, winget/choco).</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#5FC4B6"></span>package</td><td>A dependency declared by a project's manifest or lockfile.</td></tr>
+
+            <tr class="family-row"><td colspan="2">ENVIRONMENT &amp; TOOLING</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#C9A64A"></span>tool</td><td>A developer tool detected on <code>PATH</code>.</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#B8934A"></span>environment_variable</td><td>A variable name observed in a process's environment. Values are never read.</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#A7873F"></span>ssh_config_entry</td><td>A <code>Host</code> alias from <code>~/.ssh/config</code>: hostname, user, and port only, never key material.</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#D4B968"></span>config_file</td><td>A recognized config filename inside a project root.</td></tr>
+
+            <tr class="family-row"><td colspan="2">EPHEMERAL / STORAGE</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#7A7E86"></span>build_artifact</td><td>Compiled output from a build step (<code>target/</code>, <code>dist/</code>, <code>build/</code>).</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#7A7E86"></span>cache</td><td>A known package-manager or tool cache directory.</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#7A7E86"></span>disk_usage_entry</td><td>A sized, dated directory the disk-usage provider flagged as worth knowing about.</td></tr>
+
+            <tr class="family-row"><td colspan="2">SERVICE INFRASTRUCTURE</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#C15C8E"></span>service</td><td>An OS-level background service (launchd on macOS, systemd user units on Linux).</td></tr>
+            <tr><td class="kind-name"><span class="kind-dot" style="background:#A34473"></span>database</td><td>A logical database observed via container or service metadata.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         3. PROJECTS: one detail-pane replica. Radio-group pattern:
+         no custom JS, native keyboard support, real hover-then-click
+         interaction model matching the app's own (root DESIGN.md 4.2).
+         ============================================================ -->
+    <section id="projects" class="container" data-density="panel" aria-labelledby="projects-h">
+      <div class="section-head">
+        <h2 id="projects-h">One project's full record</h2>
+        <p class="prose">
+          Click a project, or tab to it and use the arrow keys, to see its detail pane: the
+          same one the app opens on hover-then-click, never a modal, never a separate route.
+          Three fabricated projects, so the pane has something real to show.
+        </p>
+        <span class="sample-tag">Sample data</span>
+      </div>
+
+      <div class="project-panel">
+        <fieldset class="project-list">
+          <legend class="visually-hidden">Sample projects</legend>
+          <label class="project-row">
+            <input class="project-row-input" type="radio" name="project-select" id="proj-api-gateway" checked />
+            <span class="project-row-name">api-gateway</span>
+            <span class="project-row-meta">TypeScript · Express</span>
+          </label>
+          <label class="project-row">
+            <input class="project-row-input" type="radio" name="project-select" id="proj-billing-service" />
+            <span class="project-row-name">billing-service</span>
+            <span class="project-row-meta">Rust · axum</span>
+          </label>
+          <label class="project-row">
+            <input class="project-row-input" type="radio" name="project-select" id="proj-worker-queue" />
+            <span class="project-row-name">worker-queue</span>
+            <span class="project-row-meta">Python · celery</span>
+          </label>
+        </fieldset>
+
+        <div class="detail-pane-wrap">
+          <div class="detail-pane detail-api-gateway">
+            <div class="detail-pane__title">
+              <h3>api-gateway</h3>
+              <span class="kind-badge"><span class="kind-dot" style="background:#C4783E; margin-right:0;"></span>project</span>
+            </div>
+            <p class="detail-pane__path mono">~/Developer/api-gateway</p>
+            <dl class="kv-list">
+              <dt>language</dt><dd>TypeScript</dd>
+              <dt>framework</dt><dd>Express</dd>
+              <dt>branch</dt><dd>main</dd>
+              <dt>first_seen</dt><dd>2026-03-02</dd>
+              <dt>last_seen</dt><dd>2026-08-21 09:14</dd>
+            </dl>
+            <p class="label" style="margin-bottom: var(--sp-2);">Evidence</p>
+            <ul class="evidence-list">
+              <li><div class="evidence-source">projects</div><div class="evidence-desc">package.json found at project root</div><div class="evidence-path mono">~/Developer/api-gateway/package.json</div></li>
+              <li><div class="evidence-source">git</div><div class="evidence-desc">.git directory found, 3 local branches</div><div class="evidence-path mono">~/Developer/api-gateway/.git</div></li>
+            </ul>
+          </div>
+
+          <div class="detail-pane detail-billing-service">
+            <div class="detail-pane__title">
+              <h3>billing-service</h3>
+              <span class="kind-badge"><span class="kind-dot" style="background:#C4783E; margin-right:0;"></span>project</span>
+            </div>
+            <p class="detail-pane__path mono">~/Developer/billing-service</p>
+            <dl class="kv-list">
+              <dt>language</dt><dd>Rust</dd>
+              <dt>framework</dt><dd>axum</dd>
+              <dt>branch</dt><dd>main</dd>
+              <dt>first_seen</dt><dd>2026-01-18</dd>
+              <dt>last_seen</dt><dd>2026-08-21 09:14</dd>
+            </dl>
+            <p class="label" style="margin-bottom: var(--sp-2);">Evidence</p>
+            <ul class="evidence-list">
+              <li><div class="evidence-source">projects</div><div class="evidence-desc">Cargo.toml found at project root</div><div class="evidence-path mono">~/Developer/billing-service/Cargo.toml</div></li>
+              <li><div class="evidence-source">git</div><div class="evidence-desc">.git directory found, 1 local branch</div><div class="evidence-path mono">~/Developer/billing-service/.git</div></li>
+            </ul>
+          </div>
+
+          <div class="detail-pane detail-worker-queue">
+            <div class="detail-pane__title">
+              <h3>worker-queue</h3>
+              <span class="kind-badge"><span class="kind-dot" style="background:#C4783E; margin-right:0;"></span>project</span>
+            </div>
+            <p class="detail-pane__path mono">~/Developer/worker-queue</p>
+            <dl class="kv-list">
+              <dt>language</dt><dd>Python</dd>
+              <dt>framework</dt><dd>celery</dd>
+              <dt>branch</dt><dd>main</dd>
+              <dt>first_seen</dt><dd>2026-05-27</dd>
+              <dt>last_seen</dt><dd>2026-08-21 09:14</dd>
+            </dl>
+            <p class="label" style="margin-bottom: var(--sp-2);">Evidence</p>
+            <ul class="evidence-list">
+              <li><div class="evidence-source">projects</div><div class="evidence-desc">pyproject.toml found at project root</div><div class="evidence-path mono">~/Developer/worker-queue/pyproject.toml</div></li>
+              <li><div class="evidence-source">git</div><div class="evidence-desc">.git directory found, 2 local branches</div><div class="evidence-path mono">~/Developer/worker-queue/.git</div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         4. DEPENDENCY GRAPH: the full-bleed interactive canvas demo.
+         The most spacious section on the page. Sparse density.
+         ============================================================ -->
+    <section id="graph" class="graph-section bleed" data-density="breath" aria-labelledby="graph-h">
+      <div class="container" style="padding-bottom: var(--sp-6);">
+        <div class="section-head" style="margin-bottom: var(--sp-5);">
+          <h2 id="graph-h">The graph is the content</h2>
+          <p class="prose">
+            Real force layout (link + charge, settles under ~800ms then stops: no idle drift),
+            real kind-family colors, real hover/selection rules: direct edges brighten to
+            copper, everything else dims to 8%. Scroll to zoom, drag to pan, click a node or
+            use the arrow keys once it's focused.
+          </p>
+          <span class="sample-tag">38 fabricated resources, 34 fabricated relationships: not a scan</span>
+        </div>
+      </div>
+      <div class="graph-stage">
+        <div class="graph-overlay-head">
+          <p class="graph-hint mono">scroll to zoom · drag to pan<br />arrow keys to cycle nodes</p>
+        </div>
+        <canvas id="full-graph-canvas"></canvas>
+        <div id="graph-live" class="visually-hidden" role="status" aria-live="polite"></div>
+        <div class="graph-legend" id="graph-legend">
+          <span id="graph-counts" class="graph-counts mono"></span>
+        </div>
+      </div>
+      <div class="container" style="padding-top: var(--sp-6);">
+        <details>
+          <summary class="label" style="cursor:pointer;">Keyboard-accessible list view (same sample data)</summary>
+          <div class="ref-table-wrap" style="margin-top: var(--sp-4);">
+            <table class="ref-table">
+              <thead><tr><th scope="col">Resource</th><th scope="col">Kind</th><th scope="col">Relationship</th><th scope="col">To</th></tr></thead>
+              <tbody>
+                <tr><td class="kind-name">api-gateway</td><td>project</td><td>uses</td><td>Node 20.11.1</td></tr>
+                <tr><td class="kind-name">api-gateway</td><td>project</td><td>depends_on</td><td>express 4.19.2</td></tr>
+                <tr><td class="kind-name">billing-service</td><td>project</td><td>connects_to</td><td>database: billing</td></tr>
+                <tr><td class="kind-name">billing-service</td><td>project</td><td>uses</td><td>Rust 1.78.0</td></tr>
+                <tr><td class="kind-name">postgres-dev</td><td>docker_container</td><td>instantiated_from</td><td>postgres:16</td></tr>
+                <tr><td class="kind-name">postgres-dev</td><td>docker_container</td><td>mounts</td><td>pgdata volume</td></tr>
+                <tr><td class="kind-name">worker-queue</td><td>project</td><td>connects_to</td><td>redis-cache container</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         5. CLEANUP CENTER: a small dense sample list. Full density.
+         Native <details> rows: no JS, fully keyboard operable.
+         ============================================================ -->
+    <section id="cleanup" class="container" data-density="panel" aria-labelledby="cleanup-h">
+      <div class="section-head">
+        <h2 id="cleanup-h">Recommends. Never deletes.</h2>
+        <p class="prose">
+          The cleanup center surfaces unused Docker images and volumes, stale build artifacts,
+          and caches, each with its size, evidence, last-used time, what depends on it, and
+          exactly what removing it would do.
+          <strong>CodeAtlas does not delete anything in the current release; you decide.</strong>
+        </p>
+        <span class="sample-tag">Sample data: expand a row for the reasoning</span>
+      </div>
+      <ul class="cleanup-list">
+        <li class="cleanup-row">
+          <details>
+            <summary>
+              <span class="cleanup-status-dot" aria-hidden="true"></span>
+              <span class="cleanup-name"><span class="cleanup-name-text">pnpm store</span><span class="cleanup-name-path mono">~/Library/pnpm/store</span></span>
+              <span class="cleanup-size mono">2.1 GB</span>
+              <span class="cleanup-lastused mono">37d ago</span>
+              <span class="cleanup-deps mono">0 deps</span>
+            </summary>
+            <div class="cleanup-detail">
+              <p>Package-manager cache, not read by any running process in this scan.</p>
+              <p class="cleanup-consequence">The next install re-downloads packages from the registry.</p>
+            </div>
+          </details>
+        </li>
+        <li class="cleanup-row">
+          <details>
+            <summary>
+              <span class="cleanup-status-dot" aria-hidden="true"></span>
+              <span class="cleanup-name"><span class="cleanup-name-text">target/</span><span class="cleanup-name-path mono">~/Developer/billing-service/target</span></span>
+              <span class="cleanup-size mono">1.4 GB</span>
+              <span class="cleanup-lastused mono">50d ago</span>
+              <span class="cleanup-deps mono">1 dep</span>
+            </summary>
+            <div class="cleanup-detail">
+              <p>Debug build output, older than the project's most recent commit.</p>
+              <p class="cleanup-consequence">The next cargo build regenerates it. The running <code class="mono">billing-service</code> process would need a rebuild first.</p>
+            </div>
+          </details>
+        </li>
+        <li class="cleanup-row">
+          <details>
+            <summary>
+              <span class="cleanup-status-dot" aria-hidden="true"></span>
+              <span class="cleanup-name"><span class="cleanup-name-text">node:18-alpine</span><span class="cleanup-name-path mono">docker image</span></span>
+              <span class="cleanup-size mono">187 MB</span>
+              <span class="cleanup-lastused mono">228d ago</span>
+              <span class="cleanup-deps mono">0 deps</span>
+            </summary>
+            <div class="cleanup-detail">
+              <p>No container on this machine is instantiated from this image.</p>
+              <p class="cleanup-consequence">Removing it frees the image layer. Re-pulling it later costs one download.</p>
+            </div>
+          </details>
+        </li>
+        <li class="cleanup-row">
+          <details>
+            <summary>
+              <span class="cleanup-status-dot" aria-hidden="true"></span>
+              <span class="cleanup-name"><span class="cleanup-name-text">old_pgdata_backup</span><span class="cleanup-name-path mono">docker volume</span></span>
+              <span class="cleanup-size mono">640 MB</span>
+              <span class="cleanup-lastused mono">223d ago</span>
+              <span class="cleanup-deps mono">0 deps</span>
+            </summary>
+            <div class="cleanup-detail">
+              <p>Not mounted by any container in this scan.</p>
+              <p class="cleanup-consequence">Docker volumes are deleted with their data. Confirm nothing still reads this backup before removing it: this one is flagged not reversible.</p>
+            </div>
+          </details>
+        </li>
+        <li class="cleanup-row">
+          <details>
+            <summary>
+              <span class="cleanup-status-dot" aria-hidden="true"></span>
+              <span class="cleanup-name"><span class="cleanup-name-text">node_modules/</span><span class="cleanup-name-path mono">~/Developer/api-gateway/node_modules</span></span>
+              <span class="cleanup-size mono">850 MB</span>
+              <span class="cleanup-lastused mono">11d ago</span>
+              <span class="cleanup-deps mono">1 dep</span>
+            </summary>
+            <div class="cleanup-detail">
+              <p>31,402 files: larger than most dependency trees seen across this sample scan's projects.</p>
+              <p class="cleanup-consequence">The next pnpm install regenerates it from the lockfile. The running <code class="mono">api-gateway</code> process would need a restart first.</p>
+            </div>
+          </details>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============================================================
+         6. "LOCAL.": the pivot beat. Set piece:
+         display-scale-section-names-cropped. The one deliberate grid
+         break: overflows the 1120px container, cropped by the viewport.
+         ============================================================ -->
+    <section id="local" class="crop-section bleed" data-density="breath" aria-label="Local">
+      <h2 class="crop-word">LOCAL.</h2>
+    </section>
+
+    <!-- ============================================================
+         Light hinge starts here: sections 7 through 13, the app's
+         real light-mode tokens (root DESIGN.md 3.2), not a generic
+         white swap.
+         ============================================================ -->
+    <div class="zone-light">
+
+    <!-- ============================================================
+         7. PRIVACY: real facts from PRIVACY.md / SECURITY.md, dense
+         small print, a calibration certificate, not an image.
+         ============================================================ -->
+    <section id="privacy" class="container" data-density="panel" aria-labelledby="privacy-h">
+      <div class="section-head">
+        <h2 id="privacy-h">What CodeAtlas reads, and what it never does</h2>
+        <p class="prose">
+          CodeAtlas reads sensitive material by design: process lists, environment variable
+          names, SSH host configuration, Docker metadata, project source trees. Here is exactly
+          what that means, restated from <code>PRIVACY.md</code> and <code>SECURITY.md</code>,
+          the project's own docs.
+        </p>
+      </div>
+      <div class="fact-grid">
+        <div class="fact">
+          <p class="fact-label mono">NO UPLOAD</p>
+          <p class="fact-body" data-source="privacy-no-upload">There is no server component. The discovery and storage code has no network client in it at all.</p>
+        </div>
+        <div class="fact">
+          <p class="fact-label mono">NO TELEMETRY BY DEFAULT</p>
+          <p class="fact-body" data-source="privacy-no-telemetry">No usage analytics, no crash reporting to a remote service, no update-check that reports back identifying information. An opt-in feature would default off and this page would be updated first.</p>
+        </div>
+        <div class="fact">
+          <p class="fact-label mono">NO ACCOUNT</p>
+          <p class="fact-body" data-source="privacy-no-account">No sign-up, no login, no cloud sync in the current release.</p>
+        </div>
+        <div class="fact">
+          <p class="fact-label mono">ENV VARS: NAMES ONLY</p>
+          <p class="fact-body" data-source="security-env-names">Variable values are never read into a resource, never persisted to the database, and never sent to the frontend.</p>
+        </div>
+        <div class="fact">
+          <p class="fact-label mono">SSH CONFIG: FOUR FIELDS</p>
+          <p class="fact-body" data-source="security-ssh-fields">Only <code class="mono">Host</code>, <code class="mono">HostName</code>, <code class="mono">User</code>, and <code class="mono">Port</code> from <code class="mono">~/.ssh/config</code>. Private keys and <code class="mono">known_hosts</code> are never opened.</p>
+        </div>
+        <div class="fact">
+          <p class="fact-label mono">GIT REMOTES: CREDENTIALS STRIPPED</p>
+          <p class="fact-body" data-source="security-git-redact">Any userinfo token embedded in a remote URL (<code class="mono">https://TOKEN@host/...</code>) is stripped before the URL is ever stored or displayed.</p>
+        </div>
+        <div class="fact">
+          <p class="fact-label mono">COMMAND LINES: TRUNCATED AND CHECKED</p>
+          <p class="fact-body" data-source="security-cmdline">A short preview only, executable name plus one argument. A real scan during development surfaced a credential passed as a command-line argument by an unrelated tool, so every surviving token is now additionally checked against a secret-shaped pattern before storage.</p>
+        </div>
+        <div class="fact">
+          <p class="fact-label mono">WHERE IT LIVES</p>
+          <p class="fact-body" data-source="privacy-storage">A single SQLite database in your OS's standard application-data directory. Nothing leaves that file unless you export or share it yourself.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         8. CROSS-PLATFORM SUPPORT: honest three-row status table.
+         ============================================================ -->
+    <section id="platforms" class="container" data-density="panel" aria-labelledby="platforms-h">
+      <div class="section-head">
+        <h2 id="platforms-h">Where this has actually run</h2>
+      </div>
+      <table class="status-table" data-source="platform-status">
+        <thead>
+          <tr><th scope="col">Platform</th><th scope="col">Status</th><th scope="col">Detail</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>macOS</td>
+            <td><span class="status-pill status-pill--verified">Verified</span></td>
+            <td>Run and verified against real, live system data. The primary development platform so far.</td>
+          </tr>
+          <tr>
+            <td>Linux</td>
+            <td><span class="status-pill status-pill--partial">Compiles, untested on hardware</span></td>
+            <td>Platform code compiles and passes unit tests for its parsing logic; has not yet been run end-to-end against a real Linux machine.</td>
+          </tr>
+          <tr>
+            <td>Windows</td>
+            <td><span class="status-pill status-pill--partial">Compiles, untested on hardware</span></td>
+            <td>Platform code compiles and passes unit tests for its parsing logic; has not yet been run end-to-end against a real Windows machine.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="prose" style="margin-top: var(--sp-5); font-size: 13px;">
+        CI builds an installer for macOS (arm64 + x64), Linux, and Windows on every tagged
+        release, independent of the verification status above.
+      </p>
+      <p class="prose" style="margin-top: var(--sp-3); font-size: 13px;" data-source="diskusage-timing">
+        The disk-usage provider walks and sizes cache/build-artifact directories synchronously;
+        on the author's own <code class="mono">~/Developer</code> with 79 projects, it's the
+        slowest single provider, observed around 15 to 20 seconds. It doesn't block the others,
+        since they run concurrently, but it sets the floor for total scan time.
+      </p>
+    </section>
+
+    <!-- ============================================================
+         9. DEVELOPER WORKFLOW / CLI: real command syntax from
+         README.md, output drawn from the same sample fixture.
+         ============================================================ -->
+    <section id="cli" class="container" data-density="panel" aria-labelledby="cli-h">
+      <div class="section-head">
+        <h2 id="cli-h">Also a CLI</h2>
+        <p class="prose" data-source="readme-cli">
+          CodeAtlas ships a scriptable CLI, <code class="mono">codeatlas</code>, built from the
+          same discovery engine the desktop app uses.
+        </p>
+        <span class="sample-tag">Command syntax is real. Output below is sample data.</span>
+      </div>
+      <div class="transcript">
+        <pre><span class="prompt">$</span> <span class="cmd">codeatlas scan</span>
+<span class="out">Scanning configured search roots...
+  projects              4 found      0.04s
+  git                    3 found      0.11s
+  processes              5 found      0.02s
+  docker                10 found      0.41s
+  runtimes               3 found      0.09s
+  package_managers       5 found      0.06s
+  tools                  1 found      0.01s
+  environment             2 found      0.01s
+  ssh                     1 found      0.01s
+  disk_usage              3 found      2.31s
+  services                1 found      0.03s
+
+scan complete: 38 resources, 34 relationships, 11 providers, 4.9s</span></pre>
+        <pre><span class="prompt">$</span> <span class="cmd">codeatlas ls project</span>
+<span class="out">api-gateway         ~/Developer/api-gateway         TypeScript · Express
+billing-service      ~/Developer/billing-service      Rust · axum
+worker-queue          ~/Developer/worker-queue          Python · celery</span></pre>
+        <pre><span class="prompt">$</span> <span class="cmd">codeatlas search postgres</span>
+<span class="out">docker_container    postgres-dev            image postgres:16, port 5432
+docker_image        postgres:16             438 MB
+database            billing                 engine postgres 16
+service             postgresql@16           launchd, port 5432
+port                :5432                   bound by 2 resources: see cleanup notes</span></pre>
+        <pre><span class="prompt">$</span> <span class="cmd">codeatlas changes</span>
+<span class="out">2026-08-19  discovered   environment_variable   STRIPE_API_KEY
+2026-08-10  modified     docker_image           node:18-alpine (now unused)
+2026-07-02  modified     build_artifact         target/ (0.9 GB -> 1.4 GB)
+2026-06-30  modified     docker_container       redis-cache (running -> exited)
+2026-05-27  discovered   project                worker-queue</span></pre>
+        <pre><span class="prompt">$</span> <span class="cmd">codeatlas scans</span>
+<span class="out">2026-08-21 09:14   completed   38 resources   11 providers   4.9s
+2026-08-20 22:03   completed   37 resources   11 providers   5.1s</span></pre>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         10. PRODUCT SCREENSHOTS: real captures, reserved frames sized
+         to the app's real chrome proportions.
+         ============================================================ -->
+    <section id="screenshots" class="container" data-density="breath" aria-labelledby="screenshots-h">
+      <div class="section-head">
+        <h2 id="screenshots-h">The real app</h2>
+        <p class="prose">Five views of the actual running application: not mockups.</p>
+      </div>
+      <div class="shot-grid">
+        <figure class="shot-frame">
+          <img src="/screenshots/overview.png" alt="Screenshot of the CodeAtlas desktop app's Overview view" width="1280" height="800" loading="lazy" />
+          <figcaption class="shot-caption">Overview: the machine's top-level summary.</figcaption>
+        </figure>
+        <figure class="shot-frame">
+          <img src="/screenshots/projects.png" alt="Screenshot of the CodeAtlas desktop app's Projects view, list and detail pane" width="1280" height="800" loading="lazy" />
+          <figcaption class="shot-caption">Projects: the dense list and resizable detail pane.</figcaption>
+        </figure>
+        <figure class="shot-frame">
+          <img src="/screenshots/dependency-graph.png" alt="Screenshot of the CodeAtlas desktop app's Dependency Graph view" width="1280" height="800" loading="lazy" />
+          <figcaption class="shot-caption">Dependency graph: the real canvas render on a real machine's data.</figcaption>
+        </figure>
+        <figure class="shot-frame">
+          <img src="/screenshots/cleanup-center.png" alt="Screenshot of the CodeAtlas desktop app's Cleanup Center view" width="1280" height="800" loading="lazy" />
+          <figcaption class="shot-caption">Cleanup center: candidates with evidence, size, and consequence.</figcaption>
+        </figure>
+        <figure class="shot-frame">
+          <img src="/screenshots/timeline.png" alt="Screenshot of the CodeAtlas desktop app's Timeline view" width="1280" height="800" loading="lazy" />
+          <figcaption class="shot-caption">Timeline: the diffed change history between scans.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         11. OPEN SOURCE / GITHUB
+         ============================================================ -->
+    <section id="open-source" class="container" data-density="panel" aria-labelledby="open-source-h">
+      <div class="section-head">
+        <h2 id="open-source-h">Dual-licensed, publicly developed</h2>
+        <p class="prose" data-source="readme-license">
+          Dual-licensed under MIT or Apache License 2.0, at your option. Apache-2.0 adds an
+          explicit patent grant, which matters for software that inspects a machine's installed
+          toolchains and containers; MIT satisfies anyone who prefers the simpler, more
+          permissive option. This is the convention most of the Rust ecosystem uses, which
+          keeps CodeAtlas's own dependency tree license-compatible without friction.
+        </p>
+      </div>
+      <div class="badge-row" data-source="ci-facts">
+        <span class="kind-badge">CI: Rust + frontend lint/test/build</span>
+        <span class="kind-badge">CodeQL: JS/TS, on push + weekly</span>
+        <span class="kind-badge"><code class="mono">cargo audit</code> in CI</span>
+        <span class="kind-badge">Dependabot: cargo, npm, GitHub Actions</span>
+      </div>
+      <div class="license-grid">
+        <div class="license-card">
+          <h3>MIT</h3>
+          <p class="prose" style="font-size:13px;">The simpler, more permissive option. <a href="https://github.com/levimackay/codeatlas/blob/main/LICENSE-MIT">LICENSE-MIT</a></p>
+        </div>
+        <div class="license-card">
+          <h3>Apache License 2.0</h3>
+          <p class="prose" style="font-size:13px;">Adds an explicit patent grant. <a href="https://github.com/levimackay/codeatlas/blob/main/LICENSE-APACHE">LICENSE-APACHE</a></p>
+        </div>
+      </div>
+      <p class="prose" style="margin-top: var(--sp-6);">
+        <a href="https://github.com/levimackay/codeatlas">github.com/levimackay/codeatlas</a> ·
+        <a href="https://github.com/levimackay/codeatlas/blob/main/CONTRIBUTING.md">Contributing guide</a> ·
+        <a href="https://github.com/levimackay/codeatlas/blob/main/ARCHITECTURE.md">Architecture</a>
+      </p>
+    </section>
+
+    <!-- ============================================================
+         12. DOWNLOAD: the conversion moment.
+         ============================================================ -->
+    <section id="download" class="container" data-density="breath" aria-labelledby="download-h">
+      <div class="section-head">
+        <h2 id="download-h">Run it on your own machine</h2>
+      </div>
+      <div class="download-panel">
+        <p class="prose">
+          No tagged release is confirmed at the time this page was built. Until installers are
+          published on the Releases page, build from source:
+        </p>
+        <div class="code-line"><span class="mono">git clone https://github.com/levimackay/codeatlas.git &amp;&amp; cd codeatlas &amp;&amp; pnpm install &amp;&amp; pnpm tauri dev</span></div>
+        <div class="hero__ctas">
+          <a class="btn btn-primary" href="https://github.com/levimackay/codeatlas">Clone from GitHub</a>
+          <a class="btn btn-secondary" href="https://github.com/levimackay/codeatlas/releases">Check Releases</a>
+        </div>
+        <p class="download-note" data-source="readme-unsigned-builds">
+          Once installers exist, expect them to be unsigned at first: no Apple Developer ID or
+          Windows code-signing certificate is configured yet, so macOS will show an
+          "unidentified developer" Gatekeeper warning and Windows will show a SmartScreen
+          warning on first launch.
+        </p>
+      </div>
+    </section>
+
+    </div><!-- /.zone-light -->
+
+    <!-- ============================================================
+         13. FOOTER: plain typographic index.
+         ============================================================ -->
+    <footer id="footer" class="footer zone-light">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <h3>Product</h3>
+            <ul>
+              <li><a href="#hero">Overview</a></li>
+              <li><a href="#graph">Dependency graph</a></li>
+              <li><a href="#download">Download</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>Source</h3>
+            <ul>
+              <li><a href="https://github.com/levimackay/codeatlas">GitHub</a></li>
+              <li><a href="https://github.com/levimackay/codeatlas/blob/main/LICENSE-MIT">License (MIT)</a></li>
+              <li><a href="https://github.com/levimackay/codeatlas/blob/main/LICENSE-APACHE">License (Apache-2.0)</a></li>
+              <li><a href="https://github.com/levimackay/codeatlas/blob/main/CONTRIBUTING.md">Contributing</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>Trust</h3>
+            <ul>
+              <li><a href="https://github.com/levimackay/codeatlas/blob/main/PRIVACY.md">Privacy</a></li>
+              <li><a href="https://github.com/levimackay/codeatlas/blob/main/SECURITY.md">Security</a></li>
+              <li><a href="https://github.com/levimackay/codeatlas/blob/main/CODE_OF_CONDUCT.md">Code of conduct</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h3>Contact</h3>
+            <ul>
+              <li><a href="mailto:levibmackay@gmail.com">levibmackay@gmail.com</a></li>
+              <li><a href="https://github.com/levimackay/codeatlas/issues">Report an issue</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>CodeAtlas: dual-licensed MIT OR Apache-2.0.</span>
+          <span>Local-first. No account, no cloud sync, no upload.</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
