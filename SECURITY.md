@@ -121,3 +121,11 @@ warning behind a bulk "clean everything" action.
 - Elevated-privilege discovery (inspecting processes owned by other
   users, for instance) is not implemented; CodeAtlas only sees what the
   current user's privileges already expose.
+- `glib` (GHSA-wrw7-89jp-8q8g, medium severity, a soundness issue in
+  `glib::VariantStrIter`'s iterator implementations) is pulled in
+  transitively by Tauri's own GTK stack on Linux, pinned by `tauri`/
+  `gtk`/`webkit2gtk`, not by anything in this repository's own
+  `Cargo.toml`. CodeAtlas does not use `glib::VariantStrIter`. Tracked
+  via Dependabot; will be picked up automatically once Tauri's upstream
+  dependencies move past the affected range, not worked around with a
+  manual version pin that could desync from the rest of the GTK stack.

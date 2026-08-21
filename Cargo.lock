@@ -644,6 +644,7 @@ dependencies = [
  "codeatlas-platform",
  "directories",
  "libc",
+ "serde",
  "serde_json",
  "tokio",
 ]

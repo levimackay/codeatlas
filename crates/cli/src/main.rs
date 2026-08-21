@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 use codeatlas_db::Database;
 use codeatlas_discovery::{DiscoveryEngine, ScanContext};
+use serde::Serialize;
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -39,6 +40,19 @@ enum Command {
     },
     /// Show scan history.
     Scans,
+    /// Dump the current machine model as a single static JSON document.
+    ///
+    /// This is a dev-tooling command, not part of the product surface: it
+    /// exists to produce fixtures for the frontend's local demo mode (see
+    /// `src/demo/`), used only for visual QA and screenshotting the UI
+    /// outside a real Tauri window. It reuses the exact same `Database`
+    /// read methods the desktop app's Tauri commands call, so the shape
+    /// on disk matches what `invoke()` would return in production.
+    ExportJson {
+        /// Write to this file instead of stdout.
+        #[arg(long)]
+        out: Option<PathBuf>,
+    },
 }
 
 /// Restores the default SIGPIPE disposition so piping output into `head`
@@ -71,6 +85,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Search { query } => search(&db, &query)?,
         Command::Changes { limit } => print_changes(&db, limit)?,
         Command::Scans => print_scans(&db)?,
+        Command::ExportJson { out } => export_json(&db, out)?,
     }
 
     Ok(())
@@ -187,6 +202,57 @@ fn print_scans(db: &Database) -> anyhow::Result<()> {
             scan.status,
             scan.resources_found
         );
+    }
+    Ok(())
+}
+
+/// Static snapshot of everything the desktop UI's read commands (`get_graph`,
+/// `list_changes`, `list_scans`, `list_cleanup_candidates`) can return, bundled
+/// into one document. Field names are snake_case to match every other JSON
+/// shape this project emits (see `src/lib/types.ts`), so the frontend demo
+/// fixture stays a straight copy of real IPC output rather than a
+/// hand-remapped one.
+#[derive(Serialize)]
+struct DemoFixture {
+    graph: codeatlas_core::Graph,
+    changes: Vec<codeatlas_core::ChangeEvent>,
+    scans: Vec<codeatlas_core::ScanRecord>,
+    cleanup_candidates: Vec<codeatlas_core::CleanupCandidate>,
+}
+
+fn export_json(db: &Database, out: Option<PathBuf>) -> anyhow::Result<()> {
+    let graph = db.latest_graph()?;
+    let changes = db.list_changes(usize::MAX)?;
+    let scans = db.list_scans(usize::MAX)?;
+    let mut cleanup_candidates = db.list_cleanup_candidates()?;
+
+    // The CLI's `scan` command never runs cleanup analysis (only the
+    // desktop app's `run_scan` Tauri command does, right after a scan
+    // completes), so a database built purely from `codeatlas scan` has an
+    // empty `cleanup_candidates` table. Fall back to computing it directly
+    // from the latest graph so `export-json` still produces a realistic
+    // fixture without requiring a Tauri session.
+    if cleanup_candidates.is_empty() {
+        cleanup_candidates = codeatlas_discovery::cleanup::analyze(&graph);
+    }
+
+    let fixture = DemoFixture {
+        graph,
+        changes,
+        scans,
+        cleanup_candidates,
+    };
+    let json = serde_json::to_string_pretty(&fixture)?;
+
+    match out {
+        Some(path) => {
+            if let Some(parent) = path.parent() {
+                std::fs::create_dir_all(parent)?;
+            }
+            std::fs::write(&path, json)?;
+            eprintln!("Wrote {}", path.display());
+        }
+        None => println!("{json}"),
     }
     Ok(())
 }
