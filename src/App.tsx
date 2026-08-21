@@ -1,22 +1,30 @@
-import { useQuery } from "@tanstack/react-query";
-import { commands } from "./lib/commands";
+import { useOnboardingCompleteQuery } from "./lib/queries";
+import { NavigationProvider } from "./state/navigation";
+import { Onboarding } from "./components/onboarding/Onboarding";
+import { AppShell } from "./components/shell/AppShell";
 
-// Placeholder shell: proves the Rust <-> React wiring works end to end.
-// The real application shell (navigation, onboarding, command palette)
-// replaces this. See ROADMAP.md.
+// Top-level gate: onboarding on first run, the full application shell once
+// getOnboardingComplete() is true. NavigationProvider only wraps the shell
+// — onboarding is a linear flow with its own local step state, not part of
+// the app's view router.
 export default function App() {
-  const systemInfo = useQuery({ queryKey: ["system-info"], queryFn: commands.getSystemInfo });
+  const { data: onboardingComplete, isLoading } = useOnboardingCompleteQuery();
+
+  if (isLoading) {
+    return (
+      <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--surface-canvas)", color: "var(--text-tertiary)" }} className="text-body-sm">
+        Loading CodeAtlas…
+      </div>
+    );
+  }
+
+  if (!onboardingComplete) {
+    return <Onboarding />;
+  }
 
   return (
-    <main style={{ padding: "2rem", fontFamily: "system-ui" }}>
-      <h1>CodeAtlas</h1>
-      {systemInfo.isLoading && <p>Loading machine info...</p>}
-      {systemInfo.data && (
-        <p>
-          {systemInfo.data.hostname} &middot; {systemInfo.data.os} {systemInfo.data.os_version} &middot;{" "}
-          {systemInfo.data.cpu_cores} cores
-        </p>
-      )}
-    </main>
+    <NavigationProvider>
+      <AppShell />
+    </NavigationProvider>
   );
 }

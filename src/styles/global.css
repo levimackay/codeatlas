@@ -1,3 +1,160 @@
+/* ==========================================================================
+   CodeAtlas design tokens — mirrors DESIGN.md sections 2-4 exactly.
+   Fonts are self-hosted (no CDN, no runtime network fetch) per the app's
+   "no default network access" principle:
+     - National 2 is unlicensed for this open-source build, so the shipped
+       UI face is Instrument Sans (SIL OFL), the documented fallback.
+     - Berkeley Mono is unlicensed for this open-source build, so the
+       shipped data face is Commit Mono (SIL OFL), the documented fallback.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("./fonts/InstrumentSans-VF.woff2") format("woff2-variations"), url("./fonts/InstrumentSans-VF.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Commit Mono";
+  src: url("./fonts/CommitMono-VF.woff2") format("woff2-variations"), url("./fonts/CommitMono-VF.woff2") format("woff2");
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Type families — the UI-authored-copy vs. serde-sourced-data rule from
+     DESIGN.md 2.3 governs which one any given component uses. */
+  --font-ui: "National 2", "Instrument Sans", -apple-system, sans-serif;
+  --font-data: "Berkeley Mono", "Commit Mono", ui-monospace, monospace;
+
+  /* Type scale — DESIGN.md 2.3 */
+  --text-display-size: 22px;
+  --text-display-weight: 650;
+  --text-display-lh: 1.2;
+  --text-display-tracking: -0.2px;
+
+  --text-panel-title-size: 15px;
+  --text-panel-title-weight: 650;
+  --text-panel-title-lh: 1.3;
+  --text-panel-title-tracking: -0.1px;
+
+  --text-label-lg-size: 13px;
+  --text-label-lg-weight: 500;
+  --text-label-lg-lh: 1.3;
+
+  --text-label-size: 12px;
+  --text-label-weight: 500;
+  --text-label-lh: 1.35;
+  --text-label-tracking: 0.1px;
+
+  --text-body-size: 13px;
+  --text-body-weight: 400;
+  --text-body-lh: 1.5;
+
+  --text-body-sm-size: 12px;
+  --text-body-sm-weight: 400;
+  --text-body-sm-lh: 1.45;
+
+  --text-caption-size: 11px;
+  --text-caption-weight: 500;
+  --text-caption-lh: 1.3;
+  --text-caption-tracking: 0.2px;
+
+  --text-data-lg-size: 14px;
+  --text-data-lg-lh: 1.4;
+
+  --text-data-size: 13px;
+  --text-data-lh: 1.45;
+
+  --text-data-sm-size: 11.5px;
+  --text-data-sm-lh: 1.4;
+
+  --text-code-block-size: 12.5px;
+  --text-code-block-lh: 1.6;
+
+  /* Spacing — DESIGN.md 4.1 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radius — DESIGN.md 4.5 */
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-full: 9999px;
+
+  /* Status semantics — orthogonal to resource kind, DESIGN.md 3.1/3.2 */
+  --status-healthy: #4fa974;
+  --status-warning: #d9a441;
+  --status-error: #e15c5c;
+  --status-info: #5b9fd9;
+
+  color-scheme: dark;
+}
+
+/* Dark mode — the primary, default-open mode. DESIGN.md 3.1 */
+:root[data-theme="dark"] {
+  --surface-canvas: #0b0c0f;
+  --surface-content: #131519;
+  --surface-panel: #1b1e23;
+  --surface-overlay: #22252b;
+
+  --border-hairline: #2a2d34;
+  --border-hairline-strong: #383c44;
+  --border-focus: rgba(196, 120, 62, 0.55);
+
+  --text-primary: #edeef0;
+  --text-secondary: #a9adb6;
+  --text-tertiary: #71757e;
+  --text-disabled: #4a4d55;
+
+  --accent-copper: #c4783e;
+  --accent-copper-bright: #d8925c;
+  --accent-copper-dim: #8f5a30;
+  --accent-copper-wash: rgba(196, 120, 62, 0.12);
+
+  --palette-shadow-overlay: 0 8px 32px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;
+}
+
+/* Light mode — same structure, inverted ladder. DESIGN.md 3.2 */
+:root[data-theme="light"] {
+  --surface-canvas: #f4f5f7;
+  --surface-content: #fbfbfc;
+  --surface-panel: #ffffff;
+  --surface-overlay: #ffffff;
+
+  --border-hairline: #dfe1e6;
+  --border-hairline-strong: #c7cad1;
+  --border-focus: rgba(163, 97, 31, 0.6);
+
+  --text-primary: #181a1f;
+  --text-secondary: #4b4f58;
+  --text-tertiary: #787d87;
+  --text-disabled: #b1b4bb;
+
+  --accent-copper: #a3611f;
+  --accent-copper-bright: #b87330;
+  --accent-copper-dim: #7c4c18;
+  --accent-copper-wash: rgba(163, 97, 31, 0.1);
+
+  --palette-shadow-overlay: 0 4px 16px rgba(20, 22, 26, 0.1);
+
+  --status-healthy: #2e8b57;
+  --status-warning: #b07a1e;
+  --status-error: #c4433f;
+  --status-info: #3a79b0;
+
+  color-scheme: light;
+}
+
 *,
 *::before,
 *::after {
@@ -12,4 +169,182 @@ body,
 
 body {
   margin: 0;
+  background: var(--surface-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-lh);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  color: var(--accent-copper);
+}
+
+/* One shared, visible focus ring — DESIGN.md 3.1 border-focus */
+:focus-visible {
+  outline: 1.5px solid var(--border-focus);
+  outline-offset: 1px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: var(--accent-copper-wash);
+}
+
+/* Type-scale utility classes, applied per the mono-vs-humanist rule */
+.text-display {
+  font-family: var(--font-ui);
+  font-size: var(--text-display-size);
+  font-weight: var(--text-display-weight);
+  line-height: var(--text-display-lh);
+  letter-spacing: var(--text-display-tracking);
+}
+.text-panel-title {
+  font-family: var(--font-ui);
+  font-size: var(--text-panel-title-size);
+  font-weight: var(--text-panel-title-weight);
+  line-height: var(--text-panel-title-lh);
+  letter-spacing: var(--text-panel-title-tracking);
+}
+.text-label-lg {
+  font-family: var(--font-ui);
+  font-size: var(--text-label-lg-size);
+  font-weight: var(--text-label-lg-weight);
+  line-height: var(--text-label-lg-lh);
+}
+.text-label {
+  font-family: var(--font-ui);
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  line-height: var(--text-label-lh);
+  letter-spacing: var(--text-label-tracking);
+  text-transform: none;
+}
+.text-body {
+  font-family: var(--font-ui);
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-lh);
+}
+.text-body-sm {
+  font-family: var(--font-ui);
+  font-size: var(--text-body-sm-size);
+  font-weight: var(--text-body-sm-weight);
+  line-height: var(--text-body-sm-lh);
+}
+.text-caption {
+  font-family: var(--font-ui);
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  line-height: var(--text-caption-lh);
+  letter-spacing: var(--text-caption-tracking);
+}
+.text-data-lg {
+  font-family: var(--font-data);
+  font-size: var(--text-data-lg-size);
+  font-weight: 400;
+  line-height: var(--text-data-lg-lh);
+  font-variant-numeric: tabular-nums;
+}
+.text-data {
+  font-family: var(--font-data);
+  font-size: var(--text-data-size);
+  font-weight: 400;
+  line-height: var(--text-data-lh);
+  font-variant-numeric: tabular-nums;
+}
+.text-data-sm {
+  font-family: var(--font-data);
+  font-size: var(--text-data-sm-size);
+  font-weight: 400;
+  line-height: var(--text-data-sm-lh);
+  font-variant-numeric: tabular-nums;
+}
+.text-code-block {
+  font-family: var(--font-data);
+  font-size: var(--text-code-block-size);
+  font-weight: 400;
+  line-height: var(--text-code-block-lh);
+  white-space: pre-wrap;
+}
+
+/* Motion — DESIGN.md section 6. A single opacity/transform pulse used only
+   for a resource that just transitioned to a warning/error state. */
+@keyframes status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+.status-pulse {
+  animation: status-pulse 1.6s ease-in-out infinite;
+}
+
+.view-enter {
+  animation: view-enter 150ms ease-out;
+}
+@keyframes view-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Dense list row states — DESIGN.md 4.4: hover washes to surface-panel
+   with no scale/shadow, click pins the row with a copper wash + left rule. */
+.table-row {
+  background: transparent;
+  border-left: 2px solid transparent;
+}
+.table-row:hover {
+  background: var(--surface-panel);
+}
+.table-row-selected,
+.table-row-selected:hover {
+  background: var(--accent-copper-wash);
+  border-left-color: var(--accent-copper);
+}
+
+/* Scrollbars — thin, matching the instrument aesthetic, no default OS chrome */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hairline-strong) transparent;
 }

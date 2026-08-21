@@ -32,6 +32,12 @@ export default [
       ...reactHooks.configs.recommended.rules,
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "no-unused-vars": "off",
+      // TypeScript itself already reports genuine undefined-name errors
+      // (and does so correctly for ambient DOM globals, the React UMD
+      // namespace used in type positions, etc., none of which base
+      // ESLint's no-undef understands) — this is typescript-eslint's own
+      // documented recommendation for .ts/.tsx files.
+      "no-undef": "off",
     },
   },
   {
