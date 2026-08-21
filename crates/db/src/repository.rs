@@ -1,5 +1,5 @@
 use crate::convert::*;
-use crate::{Database, DbResult};
+use crate::{Database, DbError, DbResult};
 use codeatlas_core::{
     ChangeEvent, CleanupCandidate, Graph, ProviderRunSummary, Relationship, Resource, ResourceId,
     ScanRecord,
@@ -345,6 +345,24 @@ impl Database {
             });
         }
         Ok(out)
+    }
+
+    pub fn get_setting<T: serde::de::DeserializeOwned>(&self, key: &str) -> DbResult<Option<T>> {
+        let conn = self.conn.lock().expect("db mutex poisoned");
+        let value_json: Option<String> = conn
+            .query_row("SELECT value_json FROM app_settings WHERE key = ?1", params![key], |row| row.get(0))
+            .optional()?;
+        value_json.map(|json| serde_json::from_str(&json)).transpose().map_err(DbError::from)
+    }
+
+    pub fn set_setting<T: serde::Serialize>(&self, key: &str, value: &T) -> DbResult<()> {
+        let conn = self.conn.lock().expect("db mutex poisoned");
+        conn.execute(
+            "INSERT INTO app_settings (key, value_json, updated_at) VALUES (?1, ?2, ?3)
+             ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json, updated_at = excluded.updated_at",
+            params![key, serde_json::to_string(value)?, chrono::Utc::now().to_rfc3339()],
+        )?;
+        Ok(())
     }
 
     pub fn resource_by_id(&self, id: ResourceId) -> DbResult<Option<Resource>> {

@@ -31,7 +31,10 @@ pub enum DbError {
 pub type DbResult<T> = Result<T, DbError>;
 
 fn migrations() -> Migrations<'static> {
-    Migrations::new(vec![M::up(include_str!("../migrations/0001_init.sql"))])
+    Migrations::new(vec![
+        M::up(include_str!("../migrations/0001_init.sql")),
+        M::up(include_str!("../migrations/0002_settings.sql")),
+    ])
 }
 
 pub struct Database {

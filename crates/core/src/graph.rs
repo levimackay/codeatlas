@@ -71,7 +71,9 @@ impl Relationship {
 pub struct Graph {
     resources: HashMap<ResourceId, Resource>,
     relationships: Vec<Relationship>,
+    #[serde(skip)]
     outgoing: HashMap<ResourceId, Vec<usize>>,
+    #[serde(skip)]
     incoming: HashMap<ResourceId, Vec<usize>>,
 }
 

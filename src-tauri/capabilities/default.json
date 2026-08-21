@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capabilities granted to the main CodeAtlas window. Deliberately narrow: no filesystem plugin, no shell execution plugin, no network plugin. All discovery and persistence happens in Rust commands the frontend calls by name; nothing here grants the webview direct OS access.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "dialog:allow-open",
+    "dialog:allow-save",
+    "opener:allow-open-url"
+  ]
+}

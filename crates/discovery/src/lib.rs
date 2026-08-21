@@ -2,6 +2,7 @@
 //! merges their output into a `codeatlas_core::Graph`, and diffs
 //! against the previous scan to produce timeline entries.
 
+pub mod cleanup;
 mod context;
 mod engine;
 mod provider;
