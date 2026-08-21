@@ -22,7 +22,7 @@ serde.workspace = true
 serde_json.workspace = true
 anyhow.workspace = true
 clap = { version = "4", features = ["derive"] }
-directories = "5"
+directories = "6"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

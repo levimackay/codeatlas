@@ -19,7 +19,7 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
-directories = "5"
+directories = "6"
 codeatlas-core = { path = "../crates/core" }
 codeatlas-db = { path = "../crates/db" }
 codeatlas-platform = { path = "../crates/platform" }
