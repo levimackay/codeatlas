@@ -207,12 +207,28 @@ fn parse_commits(raw: &str) -> Vec<CommitSummary> {
 /// embedded personal access tokens are common enough that this is not a
 /// hypothetical: `https://ghp_xxx@github.com/...` must become
 /// `https://github.com/...`.
+///
+/// The userinfo/host boundary is the *last* `@` that appears before the
+/// authority component ends (at the first `/`, `?`, or `#` after the
+/// scheme, or at the end of the string if there is none). This matters
+/// because a password or token can itself contain an unescaped `@`
+/// (`https://user:p@ssTOKEN@host/...`); splitting on the *first* `@`
+/// leaves everything after it up to the real host through untouched,
+/// which is a redaction bypass, not just a cosmetic bug — the tail of the
+/// credential ends up stored and displayed verbatim. Scanning from the
+/// end of the authority also protects against a URL with no credentials
+/// at all but an `@` in its path (`https://host/user@repo.git`), which
+/// the first-`@` approach would misparse as userinfo and corrupt.
 fn redact_credentials(url: &str) -> String {
     if let Some(scheme_end) = url.find("://") {
         let (scheme, rest) = url.split_at(scheme_end + 3);
-        if let Some(at_pos) = rest.find('@') {
-            let (_userinfo, host_and_path) = rest.split_at(at_pos + 1);
-            return format!("{scheme}{host_and_path}");
+        let authority_end = rest
+            .find(['/', '?', '#'])
+            .unwrap_or(rest.len());
+        let (authority, remainder) = rest.split_at(authority_end);
+        if let Some(at_pos) = authority.rfind('@') {
+            let host = &authority[at_pos + 1..];
+            return format!("{scheme}{host}{remainder}");
         }
     }
     url.to_string()
@@ -248,6 +264,50 @@ mod tests {
         assert_eq!(
             redact_credentials("git@github.com:levimackay/codeatlas.git"),
             "git@github.com:levimackay/codeatlas.git"
+        );
+    }
+
+    #[test]
+    fn redacts_a_token_that_contains_an_unescaped_at_sign() {
+        // A naive "split on the first @" strips only up to that first @,
+        // leaving the tail of the credential (and a stray @) in the
+        // "redacted" output: a real bypass, not a cosmetic bug.
+        assert_eq!(
+            redact_credentials("https://user:p@ssTOKEN@github.com/org/repo.git"),
+            "https://github.com/org/repo.git"
+        );
+        assert_eq!(
+            redact_credentials("https://a@b@c@host.example.com/path"),
+            "https://host.example.com/path"
+        );
+    }
+
+    #[test]
+    fn does_not_mistake_an_at_sign_in_the_path_for_userinfo() {
+        // No credentials here at all; the `@` belongs to the path. The
+        // first-@ approach would corrupt this into "https://repo.git".
+        assert_eq!(
+            redact_credentials("https://github.com/user@name/repo.git"),
+            "https://github.com/user@name/repo.git"
+        );
+    }
+
+    #[test]
+    fn redacts_credentials_with_a_port_present() {
+        assert_eq!(
+            redact_credentials("https://token@internal-git.example.com:8443/team/repo.git"),
+            "https://internal-git.example.com:8443/team/repo.git"
+        );
+    }
+
+    #[test]
+    fn is_case_insensitive_to_scheme_when_locating_the_separator() {
+        // The scheme's own casing never affects the "://" search, since
+        // it only ever looks for the literal separator, not the scheme
+        // name itself.
+        assert_eq!(
+            redact_credentials("HTTPS://TOKEN@GitHub.com/org/repo.git"),
+            "HTTPS://GitHub.com/org/repo.git"
         );
     }
 
