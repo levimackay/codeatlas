@@ -34,6 +34,14 @@ This starts the Vite dev server and launches the native app shell with
 hot reload on the frontend. Rust changes require a rebuild, which
 `tauri dev` handles automatically (slower than a frontend-only change).
 
+For local screenshots (visual QA, marketing material) there's also
+`pnpm dev:demo` and `pnpm build:demo`, which serve the UI against a
+static local fixture instead of a real Tauri backend — useful because
+the app can't render outside a real Tauri window otherwise. These are
+gated by `VITE_DEMO_MODE` and are never part of the shipped app; the
+demo fixture is only wired in by a build-time Vite alias that these two
+scripts set, so it's absent from `pnpm dev` and `pnpm build`.
+
 ## Running the CLI
 
 ```sh

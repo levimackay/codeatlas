@@ -71,7 +71,15 @@ feature exists in the current release.
   `crates/discovery/src/providers/git.rs`.
 - **Process command lines:** truncated to a short preview (executable
   name plus one argument) before being stored; the full command line is
-  never persisted.
+  never persisted. Truncation alone is not sufficient: a real scan
+  during development surfaced an actual credential that had been passed
+  as a command-line argument by an unrelated tool, landing inside the
+  two-token preview. Every surviving token is now additionally passed
+  through `redact_secret_like_token` (`crates/discovery/src/providers/process_ports.rs`)
+  before storage, which redacts `KEY=VALUE`-shaped tokens with a
+  credential-sounding key name, long bare `KEY=VALUE` pairs even without
+  a recognized name, userinfo embedded in connection-string-style URLs,
+  and long opaque tokens with no recognizable structure.
 - **`ResourceKind::is_sensitive_by_default`:** kinds that are inherently
   about secrets (environment variables, SSH config entries) are flagged
   at the type level in `crates/core/src/resource.rs`, so any future code

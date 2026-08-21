@@ -11,6 +11,13 @@ import { Icon } from "../icons/Icon";
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
 const LABEL_ZOOM_THRESHOLD = 0.8;
+// Above this many nodes, labeling everything produces an unreadable
+// hairball (confirmed against a real 1449-node scan of a real machine)
+// rather than the precise, legible readout DESIGN.md calls for. Past
+// this density, only the hovered/selected/focused node and its immediate
+// neighborhood (and any active search match) get a label; panning in and
+// interacting is how you read a dense graph, not a wall of overlapping text.
+const LABEL_DENSE_THRESHOLD = 80;
 const MOTION_EPSILON = 0.6;
 const MAX_SIM_TICKS = 240; // ~800ms-ish at a 60fps rAF cadence, per DESIGN.md 5.1
 
@@ -54,6 +61,17 @@ export function GraphView() {
     // Only kinds that make sense as graph nodes — everything in the
     // resource map, since the graph view's whole job is to show all of it.
     return Object.values(graph.resources);
+  }, [graph]);
+
+  // Mirrors the same filter the topology effect below applies when it
+  // builds `linksRef.current` (a ref, so reading its `.length` directly in
+  // JSX shows a stale count until some unrelated state update happens to
+  // trigger a re-render afterward — confirmed stuck at "0 edges" in a real
+  // capture). This is real React state driven off the query result
+  // instead, so the footer stat is correct on the very first paint.
+  const edgeCount = useMemo(() => {
+    if (!graph) return 0;
+    return graph.relationships.filter((r) => graph.resources[r.from] && graph.resources[r.to]).length;
   }, [graph]);
 
   const draw = useCallback(() => {
@@ -141,6 +159,8 @@ export function GraphView() {
 
     // Nodes.
     const query = filterQuery.trim();
+    const showAllLabels = relevantResources.length <= LABEL_DENSE_THRESHOLD;
+    const focusSetIsLabelable = !!focusSet && focusSet.size <= LABEL_DENSE_THRESHOLD;
     for (const resource of relevantResources) {
       const node = nodes.get(resource.id);
       if (!node) continue;
@@ -171,7 +191,14 @@ export function GraphView() {
         ctx.stroke();
       }
 
-      if (t.k >= LABEL_ZOOM_THRESHOLD && alpha > 0.5) {
+      const shouldLabel =
+        showAllLabels ||
+        isSelected ||
+        isHovered ||
+        (query !== "" && matchesFilter) ||
+        (focusSetIsLabelable && inFocus);
+
+      if (t.k >= LABEL_ZOOM_THRESHOLD && alpha > 0.5 && shouldLabel) {
         ctx.globalAlpha = 1;
         ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim() || "#EDEEF0";
         ctx.font = `${11.5 / t.k}px "Berkeley Mono", "Commit Mono", monospace`;
@@ -497,7 +524,7 @@ export function GraphView() {
             );
           })}
           <span className="text-data-sm" style={{ marginLeft: "auto", color: "var(--text-tertiary)" }}>
-            {relevantResources.length} nodes · {linksRef.current.length} edges · {zoomLabel}
+            {relevantResources.length} nodes · {edgeCount} edges · {zoomLabel}
           </span>
         </div>
       </div>

@@ -18,6 +18,11 @@ website/dist/
 website/node_modules/
 website/.astro/
 
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+
 # Editors / OS
 .DS_Store
 .vscode/*
@@ -30,6 +35,13 @@ website/.astro/
 *.sqlite3-shm
 .env
 .env.local
+
+# Demo-mode fixture (src/demo/mockTauriCore.ts is real source and stays
+# tracked): this is a real machine-scan export, hand-sanitized once for
+# local screenshotting, not yet reviewed for whether it should ever live
+# in git history. Ignored defensively so a broad `git add -A` elsewhere
+# in this checkout can't sweep it into a commit unreviewed.
+src/demo/fixture.json
 
 # Logs
 *.log
